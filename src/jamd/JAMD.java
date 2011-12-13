@@ -12,13 +12,12 @@ import java.util.Map.Entry;
 
 public class JAMD {
 
-	protected HashMap<String, String> paths;
+	protected final HashMap<String, String> paths = new HashMap<String, String>();
 	protected String baseURL;
 
 	protected String[] skip = { "exports", "require", "module" };
 
 	public JAMD() {
-		paths = new HashMap<String, String>();
 	}
 
 	public JAMD(String _baseURL) {
