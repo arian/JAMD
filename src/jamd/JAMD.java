@@ -1,9 +1,9 @@
 package jamd;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -92,24 +92,11 @@ public class JAMD {
 			return;
 		}
 
-		System.out.println(filename);
-
 		// TODO it'd be better if the analysis method would accept the buffer
 		// or a FileInputStream
-		String content = "";
-		try {
-			FileReader reader = new FileReader(filename);
-			BufferedReader buffer = new BufferedReader(reader);
-			String line;
-			while ((line = buffer.readLine()) != null) {
-				content += line;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
+		String content = JAMD.readFile(_file);
 
-		ArrayList<String> deps = new ArrayList<String>();
+		Dependencies deps = new Dependencies();
 		String _id = "";
 		amd = amd && content.contains("define");
 
@@ -161,9 +148,10 @@ public class JAMD {
 				int index = dep.indexOf("/");
 				if (
 						index != -1
-						&& dep.substring(0, index).equals(pack)
-						&& dep.substring(0, 1) == ".")
-					deps.set(j, new File(id + "/../" + dep).toString());
+						&& !dep.substring(0, index).equals(pack)
+						&& ".".equals(dep.substring(0, 1))) {
+					deps.set(j, URI.create(id + "/../" + dep).normalize().toString());
+				}
 			}
 
 			Module module = new Module(id, filename, pack, amd, content, deps);
@@ -177,11 +165,24 @@ public class JAMD {
 
 	}
 
+	protected static String readFile(File filename) {
+		String content = "";
+		try {
+			FileInputStream stream = new FileInputStream(filename);
+			int ch;
+			while ((ch = stream.read()) != -1) {
+				content += (char) ch;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return content;
+	}
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
 	}
 
 }

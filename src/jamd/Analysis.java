@@ -86,12 +86,14 @@ class Analysis {
 			// strip line comments
 			if (string == '\0' && c == '/' && next == '/') {
 				current = code.indexOf('\n', current);
+				if (current == -1) break;
 				continue;
 			}
 
 			// strip other comments
 			if (string == '\0' && c == '/' && next == '*') {
 				current = code.indexOf("*/", current) + 1;
+				if (current == -1) break;
 				continue;
 			}
 

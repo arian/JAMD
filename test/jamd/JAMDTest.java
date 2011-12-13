@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.junit.Test;
 
@@ -19,28 +17,10 @@ public class JAMDTest {
 		jamd.setBaseURL("test-fixtures");
 		Modules modules = jamd.require("simple");
 
-		String[] list = modules.list();
+		String[] list = modules.listIDs();
 
 		assertEquals("number of modules", 1, list.length);
 		assertArrayEquals("list", new String[] { "simple" }, list);
-
-		/*
-		Analysis analized = jamd._analyze("" + "var a = 'foo';"
-				+ "var b = [1, 2, 3];"
-				+ "var c = ['null', 'undefined', 'hello'];");
-		Map<Integer, String> strings = analized.getStrings();
-		System.out.println(strings.keySet());
-		System.out.println(strings.values());
-
-		ArrayList<String> foo = analized.lookupArrayStrings(29);
-		System.out.println(foo);
-
-		jamd.addPath("Moo", "Foo/Bar/Yo");
-
-		jamd.require(new String[] { "Moo/Foo.js", "Bar", "MooTools.java" });
-
-		assertEquals("Result", 50, 5 * 10);
-		*/
 
 	}
 
@@ -50,7 +30,7 @@ public class JAMDTest {
 		JAMD jamd = new JAMD();
 		jamd.setBaseURL("test-fixtures");
 		Modules modules = jamd.require("one");
-		HashMap<String, ArrayList<String>> dependencies = modules.getDependencies();
+		DependencyMap dependencies = modules.getDependencies();
 
 		assertArrayEquals(new String[] {"two", "three"}, dependencies.get("one").toArray());
 		assertEquals(0, dependencies.get("two").size());
@@ -65,7 +45,7 @@ public class JAMDTest {
 		jamd.setBaseURL("test-fixtures");
 		Modules modules = jamd.require("idtest");
 
-		String[] list = modules.list();
+		String[] list = modules.listIDs();
 
 		assertArrayEquals(new String[] {"customid"}, list);
 
@@ -78,7 +58,7 @@ public class JAMDTest {
 		jamd.setBaseURL("test-fixtures");
 		Modules modules = jamd.require("with.dots.in.filename");
 
-		String[] list = modules.list();
+		String[] list = modules.listIDs();
 
 		assertArrayEquals(new String[] {"with.dots.in.filename"}, list);
 
@@ -112,7 +92,7 @@ public class JAMDTest {
 		assertEquals("Moo", module.getPackage());
 	}
 
-//	@Test
+	@Test
 	public void testDOMNode() {
 
 		JAMD jamd = new JAMD();
@@ -123,7 +103,7 @@ public class JAMDTest {
 
 		assertArrayEquals(new String[] {
 				"Core/Core/Class",
-				"Core/Utilities/typeOf",
+				"Core/Utility/typeOf",
 				"Core/Host/Array",
 				"Core/Host/String",
 				"Core/Utility/uniqueID"
@@ -160,7 +140,8 @@ public class JAMDTest {
 	public void testCrossPackageDependencies() {
 		JAMD jamd = new JAMD();
 		jamd.setBaseURL("test-fixtures");
-		jamd.addPath("PackageA", "PackageB");
+		jamd.addPath("PackageA", "packageA");
+		jamd.addPath("PackageB", "packageB");
 		Modules modules = jamd.require("PackageA/a");
 
 		assertArrayEquals(new String[] {
@@ -174,5 +155,67 @@ public class JAMDTest {
 		assertEquals(0, modules.get("PackageB/b").getDependencies().size());
 
 	}
+
+	@Test
+	public void testCircular() {
+
+		JAMD jamd = new JAMD();
+		jamd.setBaseURL("test-fixtures");
+		jamd.require("circular/a");
+
+	}
+
+	@Test
+	public void testRequireInBody() {
+
+		JAMD jamd = new JAMD();
+		jamd.setBaseURL("test-fixtures");
+		Modules modules = jamd.require("requireInBody");
+
+		DependencyMap dependencies = modules.getDependencies();
+		assertArrayEquals(new String[] {
+				"one",
+				"two",
+				"three",
+				"simple"}, dependencies.get("requireInBody").toArray());
+
+	}
+
+	// @Test
+	public void testOptions() {
+
+//		$packager = new Packager;
+//		$packager->setBaseUrl($this->fixtures);
+//		$packager->setOptions(Path::resolve($this->fixtures, 'options.js'), array(
+//			'foo' => 'bar'
+//		));
+//		$builder = $packager->req(array('options'));
+//
+//		$modules = $builder->loaded();
+//		$options = $modules['options']['options'];
+//
+//		$this->assertEquals(array(
+//			'foo' => 'bar',
+//			'modules' => 'true',
+//			'amd' => true
+//		), $options);
+
+	}
+
+	// @Test
+	public void testCommonJSModulesNoAMD() {
+
+//		$packager = new Packager;
+//		$packager->setBaseUrl($this->fixtures);
+//		$builder = $packager->req(array('modules/no-amd'));
+//
+//		$this->assertEquals(array(
+//			'modules/no-amd',
+//			'modules/a',
+//			'modules/module'
+//		), $builder->modules());
+
+	}
+
 
 }
