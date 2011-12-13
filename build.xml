@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project jamd with Jar-in-Jar Loader">
+    <target name="create_run_jar">
+    	
+    	<delete dir="bin"/>
+    	<mkdir dir="bin"/>
+    	
+		<javac
+			srcdir="src"
+			destdir="bin"
+			includeantruntime="false"
+		/>
+    	
+        <jar destfile="JAMD.jar">
+            <manifest>
+                <attribute name="Main-Class" value="jamd.JAMD"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="bin"/>
+        </jar>
+    </target>
+</project>
