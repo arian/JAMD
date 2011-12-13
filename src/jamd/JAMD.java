@@ -18,14 +18,17 @@ public class JAMD {
 	protected String[] skip = { "exports", "require", "module" };
 
 	public JAMD() {
+		setBaseURL(new File("").getAbsolutePath());
 	}
 
-	public JAMD(String _baseURL) {
-		this();
-		baseURL = _baseURL;
+	public JAMD(String baseURL) {
+		setBaseURL(baseURL);
 	}
 
 	public void setBaseURL(String url) {
+		if (url.charAt(url.length() - 1) != '/') {
+			url += "/";
+		}
 		baseURL = url;
 	}
 
@@ -83,7 +86,7 @@ public class JAMD {
 			}
 		}
 
-		File _file = new File(baseURL + "/" + filename);
+		File _file = new File(baseURL + filename);
 		filename = _file.getAbsolutePath();
 
 		if (!_file.exists()) {
@@ -182,6 +185,61 @@ public class JAMD {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+
+		String helptext = "\nRun as 'java -jar JAMD.jar <arguments>\n"
+				+ "\n"
+				+ "Options:\n"
+				+ "--path <alias> <location> Alias a path to a certain location (can be used multiple times)\n"
+				+ "--base <base path> Set the base path location\n"
+				+ "\n"
+				+ "Arguments: a list of the required modules\n\n";
+
+		if (args.length == 0) {
+			System.out.println(helptext);
+			return;
+		}
+
+		JAMD jamd = new JAMD();
+
+		String[] requires = new String[args.length];
+		int numRequires = 0;
+
+		int l = args.length;
+		for (int i = 0; i < l; i++) {
+			String arg = args[i];
+
+			if ("--help".equals(arg)) {
+				System.out.println(helptext);
+				return;
+			}
+
+			if ("--path".equals(arg)) {
+				if (l > (i + 2)) {
+					jamd.addPath(args[++i], args[++i]);
+					continue;
+				} else {
+					System.out.println("Not enough arguments for the --path option");
+					return;
+				}
+			}
+
+			if ("--base".equals(arg)){
+				if (l > (i + 1)) {
+					jamd.setBaseURL(args[++i]);
+					continue;
+				} else {
+					System.out.println("The --base argument needs one argument");
+					return;
+				}
+			}
+
+			requires[numRequires++] = arg;
+		}
+
+		requires = Arrays.copyOfRange(requires, 0, numRequires);
+
+		System.out.println(jamd.require(requires).output());
+
 	}
 
 }
